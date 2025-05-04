@@ -3,7 +3,7 @@
 * Student Id: 1590392
 * Email: matthiaso@student.unimelb.edu.au
 */
-package WhiteboardApp;
+package whiteboardapp;
 
 import java.awt.Font;
 import java.awt.Frame;

@@ -11,6 +11,9 @@ package constants;
  * @author Matthias Si En Ong
 */
 public class Constants {
+	
+	public enum ShapeType { LINE, RECTANGLE, OVAL, TRIANGLE, FREEHAND };
+	
 	public static final String ERROR_CONN_FAILED = "Error: Connection to server failed!";
 	public static final String ERROR_CONN_IOEXCEPT = "Error: Connection Failed - IOException";
 	public static final String CONNECT_SUCCESS = "Connection with server established!";

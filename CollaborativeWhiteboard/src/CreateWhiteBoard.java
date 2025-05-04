@@ -5,7 +5,7 @@
 */
 import java.awt.EventQueue;
 
-import WhiteboardApp.MainWindow;
+import whiteboardapp.MainWindow;
 
 /**
  * This class contains the entry point of the Dictionary Client.
