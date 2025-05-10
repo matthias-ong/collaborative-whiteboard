@@ -12,7 +12,7 @@ package constants;
 */
 public class Constants {
 	
-	public enum ShapeType { LINE, RECTANGLE, OVAL, TRIANGLE, FREEHAND };
+	public enum ShapeType { LINE, RECTANGLE, OVAL, TRIANGLE, FREEHAND, ERASER };
 	
 	public static final String ERROR_CONN_FAILED = "Error: Connection to server failed!";
 	public static final String ERROR_CONN_IOEXCEPT = "Error: Connection Failed - IOException";

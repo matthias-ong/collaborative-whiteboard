@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -43,6 +44,8 @@ import javax.swing.JLabel;
 public class MainWindow {
 	// key UI components
 	private JFrame frame;
+	
+	private String[] eraserSizes = {"4", "8", "16", "32", "64"};
 
 	/**
      * The constructor of the MainWindow.
@@ -101,7 +104,7 @@ public class MainWindow {
         whiteboard.setBounds(0, 75, 800, 550);
         frame.getContentPane().add(whiteboard);
         
-        JLabel shapesLabel = new JLabel("Shapes");
+        JLabel shapesLabel = new JLabel("Tools");
         shapesLabel.setBounds(10, 0, 50, 24);
         frame.getContentPane().add(shapesLabel);
         
@@ -154,5 +157,24 @@ public class MainWindow {
             }
         });
         frame.getContentPane().add(freeHandBtn);
+        
+        JButton eraserBtn = new JButton("Eraser");
+        eraserBtn.setBounds(575, 0, 100, 24);
+        eraserBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.ERASER);
+            }
+        });
+        frame.getContentPane().add(eraserBtn);
+        
+        JComboBox<String> eraserSizeDropdown = new JComboBox<>(eraserSizes);
+        eraserSizeDropdown.setBounds(675, 0, 60, 24); // Positioned next to Eraser button
+        frame.getContentPane().add(eraserSizeDropdown);
+        eraserSizeDropdown.addActionListener(_ -> {
+            String selected = (String) eraserSizeDropdown.getSelectedItem();
+            int size = Integer.parseInt(selected);
+            whiteboard.setEraserSize(size);
+        });
 	}
 }
