@@ -92,4 +92,8 @@ public class Whiteboard extends JPanel {
             }
         }
     }
+    
+    public void setShapeSelection(ShapeType newShape) {
+    	this.currentShape = newShape;
+    }
 }

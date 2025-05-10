@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
 import constants.Constants;
+import constants.Constants.ShapeType;
 import network.DictionaryClient;
 
 import javax.swing.JPanel;
@@ -31,6 +32,7 @@ import javax.swing.JMenuItem;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import javax.swing.JLabel;
 
 /**
  * This class contains the front-end logic for the GUI in the WhiteBoard Application. It creates a Window
@@ -96,7 +98,61 @@ public class MainWindow {
         closeItem.addActionListener(_ -> frame.dispose());
         
         Whiteboard whiteboard = new Whiteboard();
-        whiteboard.setBounds(0, 25, 800, 600);
-        frame.add(whiteboard);
+        whiteboard.setBounds(0, 75, 800, 550);
+        frame.getContentPane().add(whiteboard);
+        
+        JLabel shapesLabel = new JLabel("Shapes");
+        shapesLabel.setBounds(10, 0, 50, 24);
+        frame.getContentPane().add(shapesLabel);
+        
+        JButton lineBtn = new JButton("Line");
+        lineBtn.setBounds(75, 0, 100, 24);
+        lineBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.LINE);
+            }
+        });
+        frame.getContentPane().add(lineBtn);
+        
+        JButton rectangleBtn = new JButton("Rectangle");
+        rectangleBtn.setBounds(175, 0, 100, 24);
+        rectangleBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.RECTANGLE);
+            }
+        });
+        frame.getContentPane().add(rectangleBtn);
+        
+        JButton ovalBtn = new JButton("Oval");
+        ovalBtn.setBounds(275, 0, 100, 24);
+        ovalBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.OVAL);
+            }
+        });
+        frame.getContentPane().add(ovalBtn);
+        
+        JButton triangleBtn = new JButton("Triangle");
+        triangleBtn.setBounds(375, 0, 100, 24);
+        triangleBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.TRIANGLE);
+            }
+        });
+        frame.getContentPane().add(triangleBtn);
+        
+        JButton freeHandBtn = new JButton("Free Hand");
+        freeHandBtn.setBounds(475, 0, 100, 24);
+        freeHandBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	whiteboard.setShapeSelection(ShapeType.FREEHAND);
+            }
+        });
+        frame.getContentPane().add(freeHandBtn);
 	}
 }
