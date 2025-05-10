@@ -26,7 +26,7 @@ public class Whiteboard extends JPanel {
     
     private ShapeType currentShape = ShapeType.FREEHAND;
     private int eraserSize = 4;
-    private Color currColor = Color.BLACK;
+    private Color currColour = Color.BLACK;
     
     abstract class Drawable {
     	List<Point> points;
@@ -42,7 +42,7 @@ public class Whiteboard extends JPanel {
 
         @Override
         void draw(Graphics2D g2) {
-            g2.setColor(Color.BLACK);
+            g2.setColor(color);
             for (int i = 1; i < points.size(); i++) {
                 Point p1 = points.get(i - 1);
                 Point p2 = points.get(i);
@@ -76,11 +76,13 @@ public class Whiteboard extends JPanel {
     class ShapeInfo extends Drawable {
         ShapeType type;
         Point p1, p2;
+        Color color;
 
-        public ShapeInfo(ShapeType type, Point p1, Point p2) {
+        public ShapeInfo(ShapeType type, Point p1, Point p2, Color color) {
             this.type = type;
             this.p1 = p1;
             this.p2 = p2;
+            this.color = color;
         }
 
         @Override
@@ -89,7 +91,7 @@ public class Whiteboard extends JPanel {
             int y = Math.min(p1.y, p2.y);
             int w = Math.abs(p1.x - p2.x);
             int h = Math.abs(p1.y - p2.y);
-            g.setColor(Color.BLACK);
+            g.setColor(color);
             switch (type) {
                 case LINE:
                     g.drawLine(p1.x, p1.y, p2.x, p2.y);
@@ -123,7 +125,7 @@ public class Whiteboard extends JPanel {
                 	if (currentShape == ShapeType.FREEHAND) {
                 		currentStroke = new ArrayList<>();
                         currentStroke.add(e.getPoint());
-                        drawHistory.add(new NormalStroke(currentStroke, currColor));
+                        drawHistory.add(new NormalStroke(currentStroke, currColour));
                 	}
                 	else if (currentShape == ShapeType.ERASER) {
                 		currentStroke = new ArrayList<>();
@@ -148,7 +150,7 @@ public class Whiteboard extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 endPoint = e.getPoint();
                 if (currentShape != ShapeType.FREEHAND && startPoint != null) {
-                	drawHistory.add(new ShapeInfo(currentShape, startPoint, endPoint));
+                	drawHistory.add(new ShapeInfo(currentShape, startPoint, endPoint, currColour));
                 }
                 startPoint = endPoint = null;
                 repaint();
@@ -172,13 +174,16 @@ public class Whiteboard extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         
         if (startPoint != null && endPoint != null) {
-            new ShapeInfo(currentShape, startPoint, endPoint).draw(g2);
+            new ShapeInfo(currentShape, startPoint, endPoint, currColour).draw(g2);
         }
         
         for (Drawable item : drawHistory) {
             item.draw(g2);
-        }
-        
+        }  
+    }
+	
+	public Color getColour() {
+    	return this.currColour;
     }
     
     public void setShapeSelection(ShapeType newShape) {
@@ -187,5 +192,8 @@ public class Whiteboard extends JPanel {
     
     public void setEraserSize(int newEraseSize) {
     	this.eraserSize = newEraseSize;
+    }
+    public void setColour(Color colour) {
+    	this.currColour = colour;
     }
 }

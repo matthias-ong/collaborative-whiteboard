@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -30,6 +31,8 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -46,6 +49,15 @@ public class MainWindow {
 	private JFrame frame;
 	
 	private String[] eraserSizes = {"4", "8", "16", "32", "64"};
+	Color[] colors = {
+		    Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY,
+		    Color.WHITE, Color.RED, Color.PINK, Color.ORANGE,
+		    Color.YELLOW, Color.GREEN, Color.MAGENTA, Color.CYAN,
+		    Color.BLUE, new Color(139, 69, 19),
+		    new Color(128, 0, 128),
+		    new Color(0, 128, 128)
+		};
+
 
 	/**
      * The constructor of the MainWindow.
@@ -175,6 +187,33 @@ public class MainWindow {
             String selected = (String) eraserSizeDropdown.getSelectedItem();
             int size = Integer.parseInt(selected);
             whiteboard.setEraserSize(size);
+        });
+        
+        int colorBtnStartX = 10;
+        int btnSize = 30;
+        int spacing = 32;
+
+        for (int i = 0; i < colors.length; i++) {
+            JButton colorBtn = new JButton();
+            colorBtn.setBackground(colors[i]);
+            colorBtn.setOpaque(true);
+            colorBtn.setBorderPainted(false);
+            colorBtn.setBounds(colorBtnStartX + (i * spacing), 30, btnSize, btnSize);
+
+            Color selectedColor = colors[i]; // effectively final
+            colorBtn.addActionListener(e -> whiteboard.setColour(selectedColor));
+
+            frame.getContentPane().add(colorBtn);
+        }
+        
+        JButton colorPickerBtn = new JButton("Pick Color");
+        colorPickerBtn.setBounds(colorBtnStartX + (colors.length * spacing), 30, btnSize, btnSize);
+        frame.getContentPane().add(colorPickerBtn);
+        colorPickerBtn.addActionListener(_ -> {
+            Color selectedColor = JColorChooser.showDialog(frame, "Choose a Color", whiteboard.getColour());
+            if (selectedColor != null) {
+                whiteboard.setColour(selectedColor);
+            }
         });
 	}
 }
