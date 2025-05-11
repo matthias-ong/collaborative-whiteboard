@@ -1,2 +1,2 @@
 # collaborative-whiteboard
-Made in Java and RMI
+Made in Java, Swing for GUI and RMI
