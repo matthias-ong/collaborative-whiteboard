@@ -1,6 +1,7 @@
 package whiteboardapp;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -11,6 +12,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -25,23 +27,27 @@ public class Whiteboard extends JPanel {
     private Point endPoint;
     
     private ShapeType currentShape = ShapeType.FREEHAND;
-    private int eraserSize = 4;
+    private int toolSize = 1;
+    private int fontSize = 12;
     private Color currColour = Color.BLACK;
     
     abstract class Drawable {
     	List<Point> points;
     	Color color;
+    	int size;
         abstract void draw(Graphics2D g2);
     }
     
     class NormalStroke extends Drawable {
-        public NormalStroke(List<Point> points, Color color) {
+        public NormalStroke(List<Point> points, Color color, int size) {
             this.points = points;
             this.color = color;
+            this.size = size;
         }
 
         @Override
         void draw(Graphics2D g2) {
+            g2.setStroke(new BasicStroke(this.size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.setColor(color);
             for (int i = 1; i < points.size(); i++) {
                 Point p1 = points.get(i - 1);
@@ -50,10 +56,28 @@ public class Whiteboard extends JPanel {
             }
         }
     }
+    
+    class TextField extends Drawable {
+    	int x, y;
+    	String text;
+        public TextField(String text, int x, int y, Color color, int size) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.text = text;
+            this.size = size;
+        }
+
+        @Override
+        void draw(Graphics2D g2) {
+        	g2.setColor(color);
+        	g2.setFont(new Font("Arial", Font.PLAIN, this.size));
+//        	g2.setFont(g2.getFont().deriveFont(this.size));
+        	g2.drawString(text, x, y);
+        }
+    }
 
     class EraserStroke extends Drawable {
-        int size;
-
         public EraserStroke(List<Point> points, int size) {
             this.points = points;
             this.size = size;
@@ -62,14 +86,14 @@ public class Whiteboard extends JPanel {
         @Override
         void draw(Graphics2D g2) {
             g2.setColor(Color.WHITE);
-            Stroke originalStroke = g2.getStroke();
-            g2.setStroke(new BasicStroke(size));
+//            Stroke originalStroke = g2.getStroke();
+            g2.setStroke(new BasicStroke(this.size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             for (int i = 1; i < points.size(); i++) {
                 Point p1 = points.get(i - 1);
                 Point p2 = points.get(i);
                 g2.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
-            g2.setStroke(originalStroke);
+//            g2.setStroke(originalStroke);
         }
     }
 
@@ -78,15 +102,17 @@ public class Whiteboard extends JPanel {
         Point p1, p2;
         Color color;
 
-        public ShapeInfo(ShapeType type, Point p1, Point p2, Color color) {
+        public ShapeInfo(ShapeType type, Point p1, Point p2, Color color, int size) {
             this.type = type;
             this.p1 = p1;
             this.p2 = p2;
             this.color = color;
+            this.size = size;
         }
 
         @Override
         void draw(Graphics2D g) {
+        	g.setStroke(new BasicStroke(this.size));
             int x = Math.min(p1.x, p2.x);
             int y = Math.min(p1.y, p2.y);
             int w = Math.abs(p1.x - p2.x);
@@ -125,13 +151,19 @@ public class Whiteboard extends JPanel {
                 	if (currentShape == ShapeType.FREEHAND) {
                 		currentStroke = new ArrayList<>();
                         currentStroke.add(e.getPoint());
-                        drawHistory.add(new NormalStroke(currentStroke, currColour));
+                        drawHistory.add(new NormalStroke(currentStroke, currColour, toolSize));
                 	}
                 	else if (currentShape == ShapeType.ERASER) {
                 		currentStroke = new ArrayList<>();
                 		currentStroke.add(e.getPoint());
-                		drawHistory.add(new EraserStroke(currentStroke, eraserSize));
+                		drawHistory.add(new EraserStroke(currentStroke, toolSize));
                 	}
+                	else if (currentShape == ShapeType.TEXT) {
+                        String inputText = JOptionPane.showInputDialog("Enter text:");
+                        if (inputText != null && !inputText.trim().isEmpty()) {
+                        	drawHistory.add(new TextField(inputText, e.getX(), e.getY(), currColour, fontSize));
+                        }
+                    }
                 	else {
                 		currentStroke = null;
                 		startPoint = e.getPoint();
@@ -150,7 +182,7 @@ public class Whiteboard extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 endPoint = e.getPoint();
                 if (currentShape != ShapeType.FREEHAND && startPoint != null) {
-                	drawHistory.add(new ShapeInfo(currentShape, startPoint, endPoint, currColour));
+                	drawHistory.add(new ShapeInfo(currentShape, startPoint, endPoint, currColour, toolSize));
                 }
                 startPoint = endPoint = null;
                 repaint();
@@ -173,25 +205,35 @@ public class Whiteboard extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
         
-        if (startPoint != null && endPoint != null) {
-            new ShapeInfo(currentShape, startPoint, endPoint, currColour).draw(g2);
-        }
-        
         for (Drawable item : drawHistory) {
             item.draw(g2);
         }  
+        
+        // draw incomplete shape
+        if (startPoint != null && endPoint != null) {
+            new ShapeInfo(currentShape, startPoint, endPoint, currColour, toolSize).draw(g2);
+        }
     }
 	
 	public Color getColour() {
     	return this.currColour;
+    }
+	public int getToolSize() {
+    	return this.toolSize;
+    }
+	public int getFontSize() {
+    	return this.fontSize;
     }
     
     public void setShapeSelection(ShapeType newShape) {
     	this.currentShape = newShape;
     }
     
-    public void setEraserSize(int newEraseSize) {
-    	this.eraserSize = newEraseSize;
+    public void setToolSize(int newSize) {
+    	this.toolSize = newSize;
+    }
+    public void setFontSize(int fontSize) {
+    	this.fontSize = fontSize;
     }
     public void setColour(Color colour) {
     	this.currColour = colour;

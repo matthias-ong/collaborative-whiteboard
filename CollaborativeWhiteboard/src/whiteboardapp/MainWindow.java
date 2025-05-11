@@ -49,7 +49,10 @@ public class MainWindow {
 	// key UI components
 	private JFrame frame;
 	
-	private String[] eraserSizes = {"4", "8", "16", "32", "64"};
+	private String[] toolSizes = {"1", "4", "8", "16", "32", "64"};
+	private String[] fontSizes = {"8", "10", "12", "14", "16", "18", "24", "32", "48", "64"};
+
+
 	Color[] colors = {
 		    Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY,
 		    Color.WHITE, Color.RED, Color.PINK, Color.ORANGE,
@@ -116,15 +119,15 @@ public class MainWindow {
         closeItem.addActionListener(_ -> frame.dispose());
         
         Whiteboard whiteboard = new Whiteboard();
-        whiteboard.setBounds(0, 75, 800, 550);
+        whiteboard.setBounds(0, 75, 800, 500);
         frame.getContentPane().add(whiteboard);
         
         JLabel shapesLabel = new JLabel("Tools");
-        shapesLabel.setBounds(10, 0, 50, 24);
+        shapesLabel.setBounds(10, 0, 40, 24);
         frame.getContentPane().add(shapesLabel);
         
         JButton lineBtn = new JButton("Line");
-        lineBtn.setBounds(75, 0, 100, 24);
+        lineBtn.setBounds(50, 0, 100, 24);
         lineBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -134,7 +137,7 @@ public class MainWindow {
         frame.getContentPane().add(lineBtn);
         
         JButton rectangleBtn = new JButton("Rectangle");
-        rectangleBtn.setBounds(175, 0, 100, 24);
+        rectangleBtn.setBounds(150, 0, 100, 24);
         rectangleBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,7 +147,7 @@ public class MainWindow {
         frame.getContentPane().add(rectangleBtn);
         
         JButton ovalBtn = new JButton("Oval");
-        ovalBtn.setBounds(275, 0, 100, 24);
+        ovalBtn.setBounds(250, 0, 100, 24);
         ovalBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -154,7 +157,7 @@ public class MainWindow {
         frame.getContentPane().add(ovalBtn);
         
         JButton triangleBtn = new JButton("Triangle");
-        triangleBtn.setBounds(375, 0, 100, 24);
+        triangleBtn.setBounds(350, 0, 100, 24);
         triangleBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -164,7 +167,7 @@ public class MainWindow {
         frame.getContentPane().add(triangleBtn);
         
         JButton freeHandBtn = new JButton("Free Hand");
-        freeHandBtn.setBounds(475, 0, 100, 24);
+        freeHandBtn.setBounds(450, 0, 100, 24);
         freeHandBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -174,7 +177,7 @@ public class MainWindow {
         frame.getContentPane().add(freeHandBtn);
         
         JButton eraserBtn = new JButton("Eraser");
-        eraserBtn.setBounds(575, 0, 100, 24);
+        eraserBtn.setBounds(550, 0, 100, 24);
         eraserBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -183,29 +186,35 @@ public class MainWindow {
         });
         frame.getContentPane().add(eraserBtn);
         
-        JComboBox<String> eraserSizeDropdown = new JComboBox<>(eraserSizes);
-        eraserSizeDropdown.setBounds(675, 0, 60, 24); // Positioned next to Eraser button
-        frame.getContentPane().add(eraserSizeDropdown);
-        eraserSizeDropdown.addActionListener(_ -> {
-            String selected = (String) eraserSizeDropdown.getSelectedItem();
-            int size = Integer.parseInt(selected);
-            whiteboard.setEraserSize(size);
+        JButton textBtn = new JButton("Text");
+        textBtn.setBounds(650, 0, 100, 24);
+        textBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                whiteboard.setShapeSelection(ShapeType.TEXT);
+            }
         });
+        frame.getContentPane().add(textBtn);
         
         int colorBtnStartX = 10;
-        int btnSize = 30;
-        int spacing = 32;
+        int btnSize = 24;
+        int spacing = 24;
 
         
         for (int i = 0; i < colors.length; i++) {
-            JButton colorBtn = new JButton();
+        	JButton colorBtn = new JButton();
+        	if (i == 0) { // black is the first colour
+        		colorBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+                colorBtn.setBorderPainted(true);
+                selectedColourBtn = colorBtn;
+        	}
             colorBtn.setBackground(colors[i]);
             colorBtn.setOpaque(true);
             colorBtn.setBorderPainted(false);
             colorBtn.setBounds(colorBtnStartX + (i * spacing), 30, btnSize, btnSize);
 
-            Color selectedColor = colors[i]; // effectively final
-            colorBtn.addActionListener(e -> {
+            Color selectedColor = colors[i];
+            colorBtn.addActionListener(_ -> {
                 whiteboard.setColour(selectedColor);
 
                 // Remove highlight from previous button
@@ -232,7 +241,34 @@ public class MainWindow {
                 whiteboard.setColour(selectedColor);
             }
         });
-
         
+        
+        JLabel sizeLabel = new JLabel("Tool Size");
+        sizeLabel.setBounds(430, 30, 80, 24);
+        frame.getContentPane().add(sizeLabel);
+        
+        JComboBox<String> sizesDropdown = new JComboBox<>(toolSizes);
+        sizesDropdown.setBounds(500, 30, 60, 24);
+        sizesDropdown.setSelectedItem(whiteboard.getToolSize()); // set default selection
+        frame.getContentPane().add(sizesDropdown);
+        sizesDropdown.addActionListener(_ -> {
+            String selected = (String) sizesDropdown.getSelectedItem();
+            int size = Integer.parseInt(selected);
+            whiteboard.setToolSize(size);
+        });
+        
+        JLabel fontSizeLabel = new JLabel("Font Size");
+        fontSizeLabel.setBounds(575, 30, 80, 24);
+        frame.getContentPane().add(fontSizeLabel);
+        
+        JComboBox<String> fontSizesDropdown = new JComboBox<>(fontSizes);
+        fontSizesDropdown.setBounds(645, 30, 60, 24);
+        fontSizesDropdown.setSelectedItem(whiteboard.getFontSize()); // set default selection
+        frame.getContentPane().add(fontSizesDropdown);
+        fontSizesDropdown.addActionListener(_ -> {
+            String selected = (String) fontSizesDropdown.getSelectedItem();
+            int size = Integer.parseInt(selected);
+            whiteboard.setFontSize(size);
+        });
 	}
 }
