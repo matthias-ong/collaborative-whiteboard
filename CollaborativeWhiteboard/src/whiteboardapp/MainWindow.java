@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -57,6 +58,8 @@ public class MainWindow {
 		    new Color(128, 0, 128),
 		    new Color(0, 128, 128)
 		};
+	
+	private JButton selectedColourBtn = null; // track colour selection button
 
 
 	/**
@@ -193,6 +196,7 @@ public class MainWindow {
         int btnSize = 30;
         int spacing = 32;
 
+        
         for (int i = 0; i < colors.length; i++) {
             JButton colorBtn = new JButton();
             colorBtn.setBackground(colors[i]);
@@ -201,7 +205,20 @@ public class MainWindow {
             colorBtn.setBounds(colorBtnStartX + (i * spacing), 30, btnSize, btnSize);
 
             Color selectedColor = colors[i]; // effectively final
-            colorBtn.addActionListener(e -> whiteboard.setColour(selectedColor));
+            colorBtn.addActionListener(e -> {
+                whiteboard.setColour(selectedColor);
+
+                // Remove highlight from previous button
+                if (selectedColourBtn != null) {
+                	selectedColourBtn.setBorderPainted(false);
+                    selectedColourBtn.setBorder(BorderFactory.createEmptyBorder());
+                }
+
+                // Highlight current button
+                colorBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+                colorBtn.setBorderPainted(true);
+                selectedColourBtn = colorBtn;
+            });
 
             frame.getContentPane().add(colorBtn);
         }
@@ -215,5 +232,7 @@ public class MainWindow {
                 whiteboard.setColour(selectedColor);
             }
         });
+
+        
 	}
 }
