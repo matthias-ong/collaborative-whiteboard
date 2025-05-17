@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.EventQueue;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -49,13 +50,31 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
 
 	@Override
 	public void notifyKicked() throws RemoteException {
-		JOptionPane.showMessageDialog(null, "You have been kicked.");
-        System.exit(0);
+		EventQueue.invokeLater(() -> {
+			JOptionPane.showMessageDialog(null, "You have been kicked.");
+			try {
+                UnicastRemoteObject.unexportObject(this, true);
+                System.out.println("Client shutdown cleanly.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            System.exit(0);
+		});
 	}
 	
 	@Override
     public void notifyManagerLeft() throws RemoteException {
-        JOptionPane.showMessageDialog(null, "Manager has exited. The application will now close.");
-        System.exit(0);
+		EventQueue.invokeLater(() -> {
+			JOptionPane.showMessageDialog(null, "Manager has exited. The application will now close.");
+			try {
+                UnicastRemoteObject.unexportObject(this, true);
+                System.out.println("Client shutdown cleanly.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            System.exit(0);
+		});
+        
+        
     }
 }

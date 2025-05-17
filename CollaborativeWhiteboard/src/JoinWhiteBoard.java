@@ -4,11 +4,16 @@
 * Email: matthiaso@student.unimelb.edu.au
 */
 import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+
+import javax.swing.JFrame;
 
 import client.WhiteboardClientServant;
 import remote.IWhiteboardClient;
@@ -58,6 +63,20 @@ public class JoinWhiteBoard {
     					WhiteboardApp app = new WhiteboardApp(server);
     					System.out.println("Join Whiteboard!");
     					client.setWhiteboard(app.getWhiteBoard());
+    					JFrame frame = app.getFrame();
+    					frame.addWindowListener(new WindowAdapter() {
+    	                    @Override
+    	                    public void windowClosed(WindowEvent e) {
+    	                        try {
+    	                            server.removeClient(client, joinWB.username); // <- implement this on server
+    	                            UnicastRemoteObject.unexportObject(client, true);
+    	                            System.out.println("Client shutdown cleanly.");
+    	                        } catch (Exception ex) {
+    	                            ex.printStackTrace();
+    	                        }
+    	                        System.exit(0);
+    	                    }
+    	                });
     					
     				} catch (Exception e) {
     					e.printStackTrace();

@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface IWhiteboardServer extends Remote {
 	void broadcastDrawEvent(DrawEvent event) throws RemoteException;
-    boolean registerClient(IWhiteboardClient client, String username) throws RemoteException;
+    void registerClient(IWhiteboardClient client, String username) throws RemoteException;
     void removeClient(IWhiteboardClient client, String username) throws RemoteException;
     boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException;
     List<String> getUserList() throws RemoteException;

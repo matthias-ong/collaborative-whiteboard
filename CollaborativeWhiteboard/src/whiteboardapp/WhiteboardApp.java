@@ -276,4 +276,8 @@ public class WhiteboardApp {
 	public Whiteboard getWhiteBoard() {
 		return this.whiteboard;
 	}
+	
+	public JFrame getFrame() {
+		return this.frame;
+	}
 }

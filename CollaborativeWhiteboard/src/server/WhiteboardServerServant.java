@@ -16,59 +16,58 @@ import remote.IWhiteboardServer;
 public class WhiteboardServerServant extends UnicastRemoteObject implements IWhiteboardServer {
 	private Map<String, IWhiteboardClient> clients = new HashMap<>();
 	private String manager;
-	
+
 	public WhiteboardServerServant(String manager) throws RemoteException {
 		this.manager = manager;
-    }
+	}
 
 	@Override
 	public void broadcastDrawEvent(DrawEvent event) throws RemoteException {
 		for (IWhiteboardClient client : clients.values()) {
-            client.receiveDrawEvent(event);
-        }	
+			client.receiveDrawEvent(event);
+		}
 	}
 
 	@Override
-	public synchronized boolean registerClient(IWhiteboardClient client, String username) throws RemoteException {
-		if (!clients.containsKey(username)) {
-            clients.put(username, client);
-            broadcastMessage(username + " joined.");
-            return true;
-        }
-		else {
-			client.notify("Username already exists! Please choose a different username.");
-			return false; // failed
-		}
+	public synchronized void registerClient(IWhiteboardClient client, String username) throws RemoteException {
+		clients.put(username, client);
+		broadcastMessage(username + " joined.");
+
 	}
 
 	@Override
 	public synchronized void removeClient(IWhiteboardClient client, String username) throws RemoteException {
 		clients.remove(username);
-        broadcastMessage(username + " left.");
+		broadcastMessage(username + " left.");
 	}
 
 	@Override
 	public synchronized boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException {
-		int response = JOptionPane.showConfirmDialog(null, username + " wants to join your whiteboard. Approve?", "Join Request", JOptionPane.YES_NO_OPTION);
-        if (response == JOptionPane.YES_OPTION) {
-        	if (registerClient(client, username))
-        		return true;
-        	else
-        		return false;
-        }
-        client.notify("Join request denied by manager.");
-        return false;
+		if (!clients.containsKey(username)) {
+			int response = JOptionPane.showConfirmDialog(null, username + " wants to join your whiteboard. Approve?",
+					"Join Request", JOptionPane.YES_NO_OPTION);
+			if (response == JOptionPane.YES_OPTION) {
+				registerClient(client, username);
+				return true;
+			}
+			client.notify("Join request denied by manager.");
+			return false;
+		} else {
+			client.notify("Username already exists! Please choose a different username.");
+			return false; // failed
+		}
+
 	}
 
 	@Override
 	public synchronized void kickUser(String username) throws RemoteException {
 		IWhiteboardClient kicked = clients.remove(username);
-        if (kicked != null) {
-            kicked.notifyKicked();
-            broadcastMessage(username + " was kicked.");
-        }
+		if (kicked != null) {
+			kicked.notifyKicked();
+			broadcastMessage(username + " was kicked.");
+		}
 	}
-	
+
 	@Override
 	public synchronized List<String> getUserList() throws RemoteException {
 		return new ArrayList<>(clients.keySet());
@@ -76,13 +75,18 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 
 	private void broadcastMessage(String msg) throws RemoteException {
 		for (IWhiteboardClient client : clients.values()) {
-            client.notify(msg);
-        }
+			client.notify(msg);
+		}
 	}
 	
+	public synchronized void broadcastManagerLeft() throws RemoteException {
+		for (IWhiteboardClient client : clients.values()) {
+			client.notifyManagerLeft();
+		}
+	}
+
 	public String getManager() {
 		return this.manager;
 	}
-	
-	
+
 }
