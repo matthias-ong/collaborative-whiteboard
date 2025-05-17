@@ -45,7 +45,7 @@ public class JoinWhiteBoard {
 			
 			boolean approved = server.requestJoin(client, joinWB.username);
             if (!approved) {
-                System.out.println("Join request denied by manager.");
+                System.out.println("Join request denied.");
                 return;
             }
             

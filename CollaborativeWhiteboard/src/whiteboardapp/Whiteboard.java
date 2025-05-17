@@ -284,7 +284,7 @@ public class Whiteboard extends JPanel {
 		}
 
 		drawHistory.add(drawable);
-		SwingUtilities.invokeLater(() -> repaint());
+		repaint();
 	}
 
 	public DrawEvent convertToDrawableData(Drawable d) {

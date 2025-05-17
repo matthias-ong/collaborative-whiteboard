@@ -30,7 +30,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 
 	@Override
 	public synchronized boolean registerClient(IWhiteboardClient client, String username) throws RemoteException {
-		if (!clients.containsValue(client)) {
+		if (!clients.containsKey(username)) {
             clients.put(username, client);
             broadcastMessage(username + " joined.");
             return true;
