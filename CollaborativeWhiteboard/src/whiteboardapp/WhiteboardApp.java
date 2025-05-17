@@ -25,7 +25,7 @@ import javax.swing.SwingWorker;
 
 import constants.Constants;
 import constants.Constants.ShapeType;
-import network.DictionaryClient;
+import remote.IWhiteboardServer;
 
 import javax.swing.JPanel;
 import javax.swing.JList;
@@ -45,13 +45,13 @@ import javax.swing.JLabel;
  * @version 1.0
  * @author Matthias Si En Ong
 */
-public class MainWindow {
+public class WhiteboardApp {
 	// key UI components
 	private JFrame frame;
 	
 	private String[] toolSizes = {"1", "4", "8", "16", "32", "64"};
 	private String[] fontSizes = {"8", "10", "12", "14", "16", "18", "24", "32", "48", "64"};
-
+	private Whiteboard whiteboard;
 
 	Color[] colors = {
 		    Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY,
@@ -70,7 +70,8 @@ public class MainWindow {
      *
      * @param args Command line arguments, it should be in the order server-address, server-port.
      */
-	public MainWindow(String args[]) {
+	public WhiteboardApp(IWhiteboardServer rmiServer) {
+		this.whiteboard = new Whiteboard(rmiServer);
 		initialise();
 		// run the connection in the background
 	}
@@ -87,7 +88,7 @@ public class MainWindow {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setLayout(null);
-		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/WhiteboardApp/dictionary.png")));
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(WhiteboardApp.class.getResource("/WhiteboardApp/dictionary.png")));
 		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBounds(0, 0, 600, 25);
@@ -118,7 +119,7 @@ public class MainWindow {
         // Example action for "Close"
         closeItem.addActionListener(_ -> frame.dispose());
         
-        Whiteboard whiteboard = new Whiteboard();
+        
         whiteboard.setBounds(0, 75, 800, 500);
         frame.getContentPane().add(whiteboard);
         
@@ -270,5 +271,9 @@ public class MainWindow {
             int size = Integer.parseInt(selected);
             whiteboard.setFontSize(size);
         });
+	}
+	
+	public Whiteboard getWhiteBoard() {
+		return this.whiteboard;
 	}
 }
