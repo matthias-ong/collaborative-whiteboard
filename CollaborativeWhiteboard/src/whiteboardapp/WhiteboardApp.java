@@ -5,20 +5,13 @@
 */
 package whiteboardapp;
 
-import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -28,14 +21,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import constants.Constants;
-import constants.Constants.ShapeType;
 import remote.IWhiteboardServer;
-
+import whiteboardapp.WhiteboardConstants.ShapeType;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
@@ -43,11 +31,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 
 /**
@@ -57,13 +41,20 @@ import javax.swing.JLabel;
  * @author Matthias Si En Ong
 */
 public class WhiteboardApp {
-	// key UI components
+	
+	/** Reference to key GUI component, used in Host application to render pop up. */
 	private JFrame frame;
 	
+	/** Tool sizes allowed to be selected. */
 	private String[] toolSizes = {"1", "4", "8", "16", "32", "64"};
+	
+	/** Font sizes allowed to be selected. */
 	private String[] fontSizes = {"8", "10", "12", "14", "16", "18", "24", "32", "48", "64"};
+	
+	/** Reference to the whiteboard backend. */
 	private Whiteboard whiteboard;
 
+	/** List of colours allowed to be selected. */
 	Color[] colors = {
 		    Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY,
 		    Color.WHITE, Color.RED, Color.PINK, Color.ORANGE,
@@ -73,20 +64,33 @@ public class WhiteboardApp {
 		    new Color(0, 128, 128)
 		};
 	
+	/** Reference to the whiteboard server. */
 	private IWhiteboardServer server;
+	
+	/** username of the whiteboard client. */
 	private String username;
 	
+	/** Keep track of current colour selection. */
 	private JButton selectedColourBtn = null; // track colour selection button
+	
+	/** Reference to the User List model GUI component. */
 	private DefaultListModel<String> userListModel = new DefaultListModel<>();
+	
+	/** Reference to the Chat Area GUI component. */
 	private JTextArea chatArea;
+	
+	/** Reference to the Chat Input GUI component. */
 	private JTextField chatInput;
 	
+	/** Boolean for manager permissions. */
 	private Boolean isManager;
+	
+	/** Reference to current file selected. */
 	private File currentFile;
 
 
 	/**
-     * The constructor of the MainWindow.
+     * The constructor of the WhiteboardApp.
      *
      * @param args Command line arguments, it should be in the order server-address, server-port.
      */
@@ -100,7 +104,7 @@ public class WhiteboardApp {
 	}
 
 	/**
-     * This function initialises the MainWindow with GUI elements.
+     * This function initialises the WhiteboardApp with GUI elements and event listeners.
      */
 	private void initialise() {
 		frame = new JFrame();
@@ -111,7 +115,8 @@ public class WhiteboardApp {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setLayout(null);
-		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(WhiteboardApp.class.getResource("/WhiteboardApp/dictionary.png")));
+		// Image Icon made by Freepik from @flaticon https://www.flaticon.com/free-icon/paint-brush_595570 
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(WhiteboardApp.class.getResource("/paint-brush.png")));
 		
 		if (this.isManager) {
 			JMenuBar menuBar = new JMenuBar();
@@ -183,7 +188,7 @@ public class WhiteboardApp {
 			        try {
 			            Boolean status = server.kickUser(usernameToKick.trim());
 			            if (!status) {
-			            	JOptionPane.showMessageDialog(frame, "Username not found!");
+			            	JOptionPane.showMessageDialog(frame, "Failed to kick!");
 			            }
 			        } catch (RemoteException ex) {
 			            JOptionPane.showMessageDialog(frame, "Error kicking user: " + ex.getMessage());
@@ -318,6 +323,11 @@ public class WhiteboardApp {
         colorPickerBtn.addActionListener(_ -> {
             Color selectedColor = JColorChooser.showDialog(frame, "Choose a Color", whiteboard.getColour());
             if (selectedColor != null) {
+            	// Remove highlight from previous button
+                if (selectedColourBtn != null) {
+                	selectedColourBtn.setBorderPainted(false);
+                    selectedColourBtn.setBorder(BorderFactory.createEmptyBorder());
+                }
                 whiteboard.setColour(selectedColor);
             }
         });
@@ -397,6 +407,9 @@ public class WhiteboardApp {
         rightPanel.add(sendBtn);
 	}
 	
+	/**
+     * This function implements saveAs logic which opens a file chooser.
+     */
 	private void saveAs() {
 		JFileChooser fileChooser = new JFileChooser();
     	fileChooser.setFileFilter(new FileNameExtensionFilter("Whiteboard Files (*.wbd)", "wbd"));
@@ -411,20 +424,31 @@ public class WhiteboardApp {
     	}
 	}
 	
+	/**
+     * Getter for the whiteboard.
+     */
 	public Whiteboard getWhiteBoard() {
 		return this.whiteboard;
 	}
 	
+	/**
+     * Getter for the frame. Used in Host application.
+     */
 	public JFrame getFrame() {
 		return this.frame;
 	}
 	
+	/**
+     * Getter for the user list model.
+     */
 	public DefaultListModel<String> getUserList() {
 		return this.userListModel;
 	}
 
+	/**
+     * Get chat area GUI
+     */
 	public JTextArea getChatArea() {
 		return this.chatArea;
 	}
-	
 }

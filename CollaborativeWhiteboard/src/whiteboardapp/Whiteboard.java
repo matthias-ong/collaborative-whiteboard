@@ -1,3 +1,8 @@
+/**
+* Author: Matthias Si En Ong
+* Student Id: 1590392
+* Email: matthiaso@student.unimelb.edu.au
+*/
 package whiteboardapp;
 
 import java.awt.BasicStroke;
@@ -6,7 +11,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -25,39 +29,100 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import constants.Constants.ShapeType;
 import remote.DrawEvent;
 import remote.IWhiteboardServer;
+import whiteboardapp.WhiteboardConstants.ShapeType;
 
+/**
+ * This class contains the main Whiteboard back end functionality.
+ * 
+ * @version 1.0
+ * @author Matthias Si En Ong
+ */
 public class Whiteboard extends JPanel {
 
+	/** The version identifier */
+	private static final long serialVersionUID = 1L;
+	
+	/** Draw history of the whiteboard. */
 	private List<Drawable> drawHistory = new ArrayList<>();
+	
+	/** Current stroke */
 	private List<Point> currentStroke = null;
+	
+	/** Starting point */
 	private Point startPoint;
+	
+	/** End point */
 	private Point endPoint;
 
+	/** Current shape that is being drawn. */
 	private ShapeType currentShape = ShapeType.FREEHAND;
+	
+	/** Current tool size that is being used. */
 	private int toolSize = 1;
+	
+	/** Current tool size that is being used. */
 	private int fontSize = 12;
+	
+	/** Current colour that is being used. */
 	private Color currColour = Color.BLACK;
 
-	IWhiteboardServer rmiServer; // refer to the whiteboard server to synchronise information with
+	/** Reference to the whiteboard server to synchronise information with */
+	IWhiteboardServer rmiServer;
 
+	/**
+	 * An abstract base class representing a drawable shape or stroke on the whiteboard.
+	 * This class holds common attributes like the list of points, color, and stroke size,
+	 * and defines an abstract method for rendering the object. Subclasses should implement how
+	 * to render the drawable object.
+	 * 
+	 * @version 1.0
+	 * @author Matthias Si En Ong
+	 */
 	public abstract class Drawable implements Serializable {
+		/** The version identifier */
+		private static final long serialVersionUID = 1L;
+
+		/** The sequence of points that make up the drawable shape or stroke. */
 		List<Point> points;
+		
+		/** Current colour that is being used. */
 		Color color;
+		
+		/** Current size that is being used. */
 		int size;
 
+		/** Draws the shape on the provided. */
 		abstract void draw(Graphics2D g2);
 	}
 
+	/**
+	 * An class extends Drawable to implement a freehand stroke.
+	 * 
+	 * @version 1.0
+	 * @author Matthias Si En Ong
+	 */
 	class NormalStroke extends Drawable {
+		/** The version identifier */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Constructor of NormalStroke.
+	     * @param points
+	     * @param color
+	     * @param size
+	     */
 		public NormalStroke(List<Point> points, Color color, int size) {
 			this.points = points;
 			this.color = color;
 			this.size = size;
 		}
 
+		/**
+		 * Implements the rendering of a normal stroke.
+	     * @param g2 Graphics2D to provide 2D rendering functionality.
+	     */
 		@Override
 		void draw(Graphics2D g2) {
 			g2.setStroke(new BasicStroke(this.size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -70,9 +135,28 @@ public class Whiteboard extends JPanel {
 		}
 	}
 
+	/**
+	 * An class extends Drawable to implement a text drawable.
+	 * 
+	 * @version 1.0
+	 * @author Matthias Si En Ong
+	 */
 	class TextField extends Drawable {
+		
+		/** The version identifier */
+		private static final long serialVersionUID = 1L;
+		
+		/** The text for the text field. */
 		String text;
 
+		/**
+		 * Constructor of TextField.
+		 * @param text
+	     * @param x
+	     * @param y
+	     * @param color
+	     * @param size
+	     */
 		public TextField(String text, int x, int y, Color color, int size) {
 			Point p1 = new Point(x, y);
 			this.points = new ArrayList<Point>(1);
@@ -82,40 +166,78 @@ public class Whiteboard extends JPanel {
 			this.size = size;
 		}
 
+		/**
+		 * Implements the rendering of a text field.
+	     * @param g2 Graphics2D to provide 2D rendering functionality.
+	     */
 		@Override
 		void draw(Graphics2D g2) {
 			g2.setColor(color);
 			g2.setFont(new Font("Arial", Font.PLAIN, this.size));
-//        	g2.setFont(g2.getFont().deriveFont(this.size));
 			Point p1 = this.points.get(0);
 			g2.drawString(text, p1.x, p1.y);
 		}
 	}
 
+	/**
+	 * An class extends drawable to implement an eraser stroke.
+	 * 
+	 * @version 1.0
+	 * @author Matthias Si En Ong
+	 */
 	class EraserStroke extends Drawable {
+		
+		/** The version identifier */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Constructor of EraserStroke.
+		 * @param points
+	     * @param size
+	     */
 		public EraserStroke(List<Point> points, int size) {
 			this.points = points;
 			this.size = size;
 		}
 
+		/**
+		 * Implements the rendering of an eraser stroke.
+	     * @param g2 Graphics2D to provide 2D rendering functionality.
+	     */
 		@Override
 		void draw(Graphics2D g2) {
 			g2.setColor(Color.WHITE);
-//            Stroke originalStroke = g2.getStroke();
 			g2.setStroke(new BasicStroke(this.size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			for (int i = 1; i < points.size(); i++) {
 				Point p1 = points.get(i - 1);
 				Point p2 = points.get(i);
 				g2.drawLine(p1.x, p1.y, p2.x, p2.y);
 			}
-//            g2.setStroke(originalStroke);
 		}
 	}
 
+	/**
+	 * An class extends drawable to implement different shape types.
+	 * 
+	 * @version 1.0
+	 * @author Matthias Si En Ong
+	 */
 	class ShapeInfo extends Drawable {
+		
+		/** The version identifier */
+		private static final long serialVersionUID = 1L;
+		
+		/** The type of shape. */
 		ShapeType type;
-		Color color;
 
+		/**
+		 * Constructor of ShapeInfo.
+		 * @param type Type of shape
+	     * @param p1
+	     * @param p2
+	     * @param color
+	     * @param size
+	     */
 		public ShapeInfo(ShapeType type, Point p1, Point p2, Color color, int size) {
 			this.points = new ArrayList<Point>(2);
 			this.points.add(p1);
@@ -125,6 +247,10 @@ public class Whiteboard extends JPanel {
 			this.size = size;
 		}
 
+		/**
+		 * Implements the rendering of a shape.
+	     * @param g Graphics2D to provide 2D rendering functionality.
+	     */
 		@Override
 		void draw(Graphics2D g) {
 			g.setStroke(new BasicStroke(this.size));
@@ -157,11 +283,17 @@ public class Whiteboard extends JPanel {
 		}
 	}
 
+	/**
+	 * Constructor of Whiteboard. Initialises the whiteboard.
+     * @param rmiServer
+     */
 	public Whiteboard(IWhiteboardServer rmiServer) {
 		this.rmiServer = rmiServer;
 		setBackground(Color.WHITE);
 
 		addMouseListener(new MouseAdapter() {
+			
+			// Upon mouse pressed listener
 			public void mousePressed(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					Drawable drawable = null;
@@ -206,6 +338,7 @@ public class Whiteboard extends JPanel {
 				}
 			}
 
+			// Upon mouse released listener
 			public void mouseReleased(MouseEvent e) {
 				endPoint = e.getPoint();
 				Drawable drawable = null;
@@ -238,6 +371,7 @@ public class Whiteboard extends JPanel {
 			}
 		});
 
+		// Upon mouse moved listener
 		addMouseMotionListener(new MouseMotionAdapter() {
 			public void mouseDragged(MouseEvent e) {
 				endPoint = e.getPoint();
@@ -249,6 +383,10 @@ public class Whiteboard extends JPanel {
 		});
 	}
 
+	/**
+	 * Renders the whiteboard and its elements.
+	 * @param g Graphics for rendering functionality.
+     */
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D)g.create();
@@ -263,6 +401,10 @@ public class Whiteboard extends JPanel {
 		}
 	}
 
+	/**
+	 * Add a drawable obtained from the whiteboard server to the client's whiteboard.
+	 * @param event
+     */
 	public void addDrawableFromNetwork(DrawEvent event) {
 		System.out.println("Received Draw Event from Server");
 		Drawable drawable = null;
@@ -294,6 +436,10 @@ public class Whiteboard extends JPanel {
 		repaint();
 	}
 
+	/**
+	 * Convert Drawable to DrawEvent to send over the network.
+	 * @param d Drawable
+     */
 	public DrawEvent convertToDrawableData(Drawable d) {
 
 		if (d instanceof NormalStroke) {
@@ -312,6 +458,10 @@ public class Whiteboard extends JPanel {
 		return null;
 	}
 	
+	/**
+	 * Saves whiteboard to file with .wbd
+	 * @param file
+     */
 	public void saveToFile(File file) throws IOException {
 		if (!file.getName().toLowerCase().endsWith(".wbd")) {
 	        file = new File(file.getAbsolutePath() + ".wbd");
@@ -322,6 +472,10 @@ public class Whiteboard extends JPanel {
 		}
 	}
 
+	/**
+	 * Loads a saved .wbd file to the local whiteboard and renders it.
+	 * @param file
+     */
 	@SuppressWarnings("unchecked")
 	public void loadFromFile(File file) throws Exception {
 		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
@@ -329,48 +483,66 @@ public class Whiteboard extends JPanel {
 			repaint();
 		}
 	}
-	
-//	public void clearWhiteboard() {
-//		drawHistory = new ArrayList<>();
-//		currentStroke = null;
-//		startPoint = null;
-//		endPoint = null;
-//		repaint();
-//	}
 
-
+	/**
+	 * Getter for current colour.
+     */
 	public Color getColour() {
 		return this.currColour;
 	}
 
+	/**
+	 * Getter for current tool size.
+     */
 	public int getToolSize() {
 		return this.toolSize;
 	}
 
+	/**
+	 * Getter for current font size.
+     */
 	public int getFontSize() {
 		return this.fontSize;
 	}
 	
+	/**
+	 * Getter for entire draw history/whiteboard state.
+     */
 	public List<Drawable> getDrawHistory() {
 		return this.drawHistory;
 	}
 
+	/**
+	 * Setter for current shape selection.
+     */
 	public void setShapeSelection(ShapeType newShape) {
 		this.currentShape = newShape;
 	}
 
+	/**
+	 * Setter for current tool size.
+     */
 	public void setToolSize(int newSize) {
 		this.toolSize = newSize;
 	}
 
+	/**
+	 * Setter for current font size.
+     */
 	public void setFontSize(int fontSize) {
 		this.fontSize = fontSize;
 	}
 
+	/**
+	 * Setter for current colour.
+     */
 	public void setColour(Color colour) {
 		this.currColour = colour;
 	}
 	
+	/**
+	 * Setter for entire draw history/whiteboard state.
+     */
 	public void setDrawHistory(List<Drawable> newHistory) {
 		this.drawHistory = newHistory;
 		currentStroke = null;

@@ -1,4 +1,3 @@
-
 /**
 * Author: Matthias Si En Ong
 * Student Id: 1590392
@@ -23,11 +22,15 @@ import whiteboardapp.WhiteboardApp;
  * @author Matthias Si En Ong
  */
 public class CreateWhiteBoard {
+	
+	/** The port number of the server to connect to. */
     private int port;
+    
+    /** The username of the manager/whiteboard host to connect to the server as. */
     private String username;
 	
 	/**
-	 * The entry point of the Whiteboard host.
+	 * The entry point of the Whiteboard host, it should be in the order server-port, username.
 	 *
 	 * @param args Command line arguments.
 	 */
@@ -43,7 +46,7 @@ public class CreateWhiteBoard {
 			registry.rebind("WhiteboardService", server);
 			
 			// Host is a client to itself too!
-			WhiteboardClientServant client = new WhiteboardClientServant(createWB.username);
+			WhiteboardClientServant client = new WhiteboardClientServant();
 			server.registerClient(client, createWB.username);
 			// WHITEBOARD GUI! Run this on Event dispatch thread, Swing code is run on the same thread.
 			EventQueue.invokeLater(new Runnable() {
@@ -83,9 +86,14 @@ public class CreateWhiteBoard {
 
 	}
 	
+	/**
+     * The function checks for valid arguments.
+     *
+     * @param args Command line arguments, it should be in the order port number, host's username.
+     */
 	private Boolean isValidArgs(String[] args) {
 		if (args.length != 2) {
-			System.out.println("java –jar CreateWhiteBoard.jar <server-port> <username>");
+			System.out.println("java -jar CreateWhiteBoard.jar <server-port> <username>");
 			return false;
 		}
 		

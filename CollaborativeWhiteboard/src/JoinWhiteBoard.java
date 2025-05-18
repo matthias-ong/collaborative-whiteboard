@@ -24,13 +24,19 @@ import whiteboardapp.WhiteboardApp;
  * @author Matthias Si En Ong
 */
 public class JoinWhiteBoard {
+	
+	/** The IP Address of the server to connect to. */
 	private String serverAddress;
+	
+	/** The port number of the server to connect to. */
     private int port;
+    
+    /** The username of the client to connect to the server as. */
     private String username;
 	/**
-     * The entry point of a Whiteboard Client.
+     * The entry point of a Whiteboard Client, it connects to a server registered on the RMI registry.
      *
-     * @param args Command line arguments, it should be in the order server-address, server-port.
+     * @param args Command line arguments, it should be in the order server-address, server-port, username.
      */
 	public static void main(String[] args) {
 		JoinWhiteBoard joinWB = new JoinWhiteBoard();
@@ -43,7 +49,7 @@ public class JoinWhiteBoard {
 			registry = LocateRegistry.getRegistry(joinWB.serverAddress, joinWB.port);
 			IWhiteboardServer server = (IWhiteboardServer) registry.lookup("WhiteboardService");
 			
-			WhiteboardClientServant client = new WhiteboardClientServant(joinWB.username);
+			WhiteboardClientServant client = new WhiteboardClientServant();
 			
 			boolean approved = server.requestJoin(client, joinWB.username);
             if (!approved) {
@@ -95,9 +101,14 @@ public class JoinWhiteBoard {
 		}
 	}
 	
+	/**
+     * The function checks for valid arguments.
+     *
+     * @param args Command line arguments, it should be in the order server-IP, port number, client username.
+     */
 	private Boolean isValidArgs(String[] args) {
 		if (args.length != 3) {
-			System.out.println("java –jar JoinWhiteBoard.jar <server-IP-address> <server-port> <username>");
+			System.out.println("java -jar JoinWhiteBoard.jar <server-IP-address> <server-port> <username>");
 			return false;
 		}
 		
