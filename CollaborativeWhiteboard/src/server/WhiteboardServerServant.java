@@ -31,7 +31,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	@Override
 	public synchronized void registerClient(IWhiteboardClient client, String username) throws RemoteException {
 		clients.put(username, client);
-		broadcastMessage(username + " joined.");
+//		broadcastMessage(username + " joined.");
 
 	}
 
@@ -39,6 +39,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	public synchronized void removeClient(IWhiteboardClient client, String username) throws RemoteException {
 		clients.remove(username);
 		broadcastMessage(username + " left.");
+		broadcastUserList();
 	}
 
 	@Override
@@ -72,10 +73,26 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	public synchronized List<String> getUserList() throws RemoteException {
 		return new ArrayList<>(clients.keySet());
 	}
+	
+	@Override
+	public synchronized void broadcastUserList() throws RemoteException {
+		List<String> userList = getUserList();
+		for (IWhiteboardClient client : clients.values()) {
+			client.updateUserList(userList);
+		}
+	}
 
-	private void broadcastMessage(String msg) throws RemoteException {
+	@Override
+	public synchronized void broadcastMessage(String msg) throws RemoteException {
 		for (IWhiteboardClient client : clients.values()) {
 			client.notify(msg);
+		}
+	}
+	
+	@Override
+	public synchronized void broadcastChatMessage(String username, String msg) throws RemoteException {
+		for (IWhiteboardClient client : clients.values()) {
+			client.notify(username + ": " + msg);
 		}
 	}
 	

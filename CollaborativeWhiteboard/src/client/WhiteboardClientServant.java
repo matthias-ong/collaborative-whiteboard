@@ -8,7 +8,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 
 import remote.DrawEvent;
 import remote.IWhiteboardClient;
@@ -20,11 +23,14 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
     private String username;
     
     private Whiteboard whiteboard;
+    private JTextArea chatArea;
+    private DefaultListModel<String> userListModel;
 
-    public void setWhiteboard(Whiteboard whiteboard) {
-        this.whiteboard = whiteboard;
+    public void initialise(Whiteboard whiteboard, JTextArea chatArea, DefaultListModel<String> userListModel) {
+    	this.whiteboard = whiteboard;
+        this.chatArea = chatArea;
+        this.userListModel = userListModel;
     }
-
     
     public WhiteboardClientServant(String username) throws RemoteException {
     	this.username = username;
@@ -45,6 +51,11 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
 	@Override
 	public void notify(String message) throws RemoteException {
 		System.out.println("Server Message: " + message);
+		if (chatArea != null) {
+	        EventQueue.invokeLater(() -> {
+	            chatArea.append(message + "\n");
+	        });
+	    }
 		
 	}
 
@@ -77,4 +88,18 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
         
         
     }
+	
+	@Override
+	public void updateUserList(List<String> userList) throws RemoteException {
+		EventQueue.invokeLater(() -> {
+			this.userListModel.clear();
+			for (String user : userList) {
+				this.userListModel.addElement(user);
+	        }
+		});
+	}
+
+	public String getUsername() {
+		return username;
+	}
 }

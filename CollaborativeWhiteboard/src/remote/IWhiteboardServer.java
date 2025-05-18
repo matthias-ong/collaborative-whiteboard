@@ -19,5 +19,8 @@ public interface IWhiteboardServer extends Remote {
     boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException;
     List<String> getUserList() throws RemoteException;
     void kickUser(String username) throws RemoteException;
+	void broadcastChatMessage(String username, String msg) throws RemoteException;
+	void broadcastMessage(String msg) throws RemoteException;
+	void broadcastUserList() throws RemoteException;
 	
 }

@@ -60,9 +60,11 @@ public class JoinWhiteBoard {
     		EventQueue.invokeLater(new Runnable() {
     			public void run() {
     				try {
-    					WhiteboardApp app = new WhiteboardApp(server);
+    					WhiteboardApp app = new WhiteboardApp(server, joinWB.username);
     					System.out.println("Join Whiteboard!");
-    					client.setWhiteboard(app.getWhiteBoard());
+    					client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
+    					server.broadcastUserList();
+    					server.broadcastMessage(joinWB.username + " joined.");
     					JFrame frame = app.getFrame();
     					frame.addWindowListener(new WindowAdapter() {
     	                    @Override

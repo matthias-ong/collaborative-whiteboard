@@ -13,14 +13,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.rmi.RemoteException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.SwingWorker;
 
 import constants.Constants;
@@ -28,6 +32,7 @@ import constants.Constants.ShapeType;
 import remote.IWhiteboardServer;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -62,7 +67,13 @@ public class WhiteboardApp {
 		    new Color(0, 128, 128)
 		};
 	
+	private IWhiteboardServer server;
+	private String username;
+	
 	private JButton selectedColourBtn = null; // track colour selection button
+	private DefaultListModel<String> userListModel = new DefaultListModel<>();
+	private JTextArea chatArea;
+	private JTextField chatInput;
 
 
 	/**
@@ -70,7 +81,9 @@ public class WhiteboardApp {
      *
      * @param args Command line arguments, it should be in the order server-address, server-port.
      */
-	public WhiteboardApp(IWhiteboardServer rmiServer) {
+	public WhiteboardApp(IWhiteboardServer rmiServer, String username) {
+		this.server = rmiServer;
+		this.username = username;
 		this.whiteboard = new Whiteboard(rmiServer);
 		initialise();
 		// run the connection in the background
@@ -83,7 +96,7 @@ public class WhiteboardApp {
 		frame = new JFrame();
 		frame.setTitle("Collaborative Whiteboard");
 		frame.setVisible(true);
-		frame.setSize(1000, 700);
+		frame.setSize(1000, 650);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
@@ -120,7 +133,7 @@ public class WhiteboardApp {
         closeItem.addActionListener(_ -> frame.dispose());
         
         
-        whiteboard.setBounds(0, 75, 800, 500);
+        whiteboard.setBounds(0, 75, 750, 500);
         frame.getContentPane().add(whiteboard);
         
         JLabel shapesLabel = new JLabel("Tools");
@@ -271,6 +284,51 @@ public class WhiteboardApp {
             int size = Integer.parseInt(selected);
             whiteboard.setFontSize(size);
         });
+        
+        // user list
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(null);
+        rightPanel.setBounds(750, 0, 230, 600);
+        frame.getContentPane().add(rightPanel);
+        
+        JLabel userListLabel = new JLabel("Users:");
+        userListLabel.setBounds(10, 10, 100, 20);
+        rightPanel.add(userListLabel);
+        
+        JList<String> userList = new JList<>(userListModel);
+        JScrollPane userScroll = new JScrollPane(userList);
+        userScroll.setBounds(10, 30, 210, 125);
+        rightPanel.add(userScroll);
+        
+        // chat
+        JLabel chatLabel = new JLabel("Chat:");
+        chatLabel.setBounds(10, 165, 100, 20);
+        rightPanel.add(chatLabel);
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
+        JScrollPane chatScroll = new JScrollPane(chatArea);
+        chatScroll.setBounds(10, 185, 210, 320);
+//        chatScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        rightPanel.add(chatScroll);
+        
+        chatInput = new JTextField();
+        chatInput.setBounds(10, 515, 140, 24);
+        rightPanel.add(chatInput);
+
+        JButton sendBtn = new JButton("Send");
+        sendBtn.setBounds(150, 515, 70, 24);
+        sendBtn.addActionListener(_ -> {
+        	String message = chatInput.getText().trim();
+        	try {
+				this.server.broadcastChatMessage(this.username, message);
+				chatInput.setText("");
+			} catch (RemoteException e1) {
+				System.out.println("Failed to broadcast message!");
+			}
+        });
+        rightPanel.add(sendBtn);
 	}
 	
 	public Whiteboard getWhiteBoard() {
@@ -280,4 +338,13 @@ public class WhiteboardApp {
 	public JFrame getFrame() {
 		return this.frame;
 	}
+	
+	public DefaultListModel<String> getUserList() {
+		return this.userListModel;
+	}
+
+	public JTextArea getChatArea() {
+		return this.chatArea;
+	}
+	
 }

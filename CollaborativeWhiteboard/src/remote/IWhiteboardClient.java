@@ -3,6 +3,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import javax.swing.JList;
+
 /**
  * RMI Remote interface - must be shared between client and server.
  * This is the interface that the server call on the clients.
@@ -17,4 +19,5 @@ public interface IWhiteboardClient extends Remote {
     void notify(String message) throws RemoteException;
     void notifyKicked() throws RemoteException;
 	void notifyManagerLeft() throws RemoteException;
+	void updateUserList(List<String> userList) throws RemoteException;
 }

@@ -28,7 +28,6 @@ import whiteboardapp.WhiteboardApp;
  * @author Matthias Si En Ong
  */
 public class CreateWhiteBoard {
-	private String serverAddress;
     private int port;
     private String username;
 	
@@ -55,8 +54,10 @@ public class CreateWhiteBoard {
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-						WhiteboardApp app = new WhiteboardApp(server);
-						client.setWhiteboard(app.getWhiteBoard());
+						WhiteboardApp app = new WhiteboardApp(server, createWB.username);
+						client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
+						server.broadcastUserList();
+						server.broadcastMessage(createWB.username + " joined.");
 						JFrame frame = app.getFrame();
 						frame.addWindowListener(new WindowAdapter() {
 				            @Override
@@ -87,24 +88,18 @@ public class CreateWhiteBoard {
 	}
 	
 	private Boolean isValidArgs(String[] args) {
-		if (args.length != 3) {
-			System.out.println("java –jar CreateWhiteBoard.jar <server-IP-address> <server-port> <username>");
+		if (args.length != 2) {
+			System.out.println("java –jar CreateWhiteBoard.jar <server-port> <username>");
 			return false;
 		}
 		
 		try {
-			InetAddress.getByName(args[0]);
-			this.serverAddress = args[0];
-			this.port = Integer.parseInt(args[1]);
+			this.port = Integer.parseInt(args[0]);
 		} catch (NumberFormatException e) {
 			System.out.println("Invalid Port Number");
 			return false;
 		}
-		catch (UnknownHostException e) {
-			System.out.println("Invalid IP address" + args[0]);
-			return false;
-		}
-		this.username = args[2];
+		this.username = args[1];
 		return true;
 	}
 
