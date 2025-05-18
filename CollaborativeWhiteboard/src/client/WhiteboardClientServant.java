@@ -20,6 +20,10 @@ import whiteboardapp.Whiteboard;
 import whiteboardapp.Whiteboard.Drawable;
 
 public class WhiteboardClientServant extends UnicastRemoteObject implements IWhiteboardClient {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private IWhiteboardServer server;
     private String username;
     

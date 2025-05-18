@@ -71,12 +71,15 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	}
 
 	@Override
-	public synchronized void kickUser(String username) throws RemoteException {
+	public synchronized Boolean kickUser(String username) throws RemoteException {
 		IWhiteboardClient kicked = clients.remove(username);
 		if (kicked != null) {
 			kicked.notifyKicked();
 			broadcastMessage(username + " was kicked.");
+			broadcastUserList();
+			return true; // success
 		}
+		return false;
 	}
 
 	@Override
@@ -119,8 +122,8 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 
 	public List<Drawable> getDrawHistory() throws RemoteException {
 		// get manager's whiteboard history, everybody syncs to manager
-		IWhiteboardClient client = clients.get(this.manager);
-		return client.getWhiteboard().getDrawHistory();
+		IWhiteboardClient manager = clients.get(this.manager);
+		return manager.getWhiteboard().getDrawHistory();
 	}
 
 	public void setDrawHistory(List<Drawable> drawHistory) throws RemoteException {

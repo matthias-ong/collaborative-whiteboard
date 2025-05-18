@@ -174,7 +174,25 @@ public class WhiteboardApp {
 	        
 	        JMenu manageMenu = new JMenu("Manage");
 			menuBar.add(manageMenu);
-	        
+			JMenuItem kickUserItem = new JMenuItem("Kick User");
+			manageMenu.add(kickUserItem);
+			
+			kickUserItem.addActionListener(_ -> {
+			    String usernameToKick = JOptionPane.showInputDialog(frame, "Enter username to kick:");
+			    if (usernameToKick != null && !usernameToKick.trim().isEmpty()) {
+			        try {
+			            Boolean status = server.kickUser(usernameToKick.trim());
+			            if (!status) {
+			            	JOptionPane.showMessageDialog(frame, "Username not found!");
+			            }
+			        } catch (RemoteException ex) {
+			            JOptionPane.showMessageDialog(frame, "Error kicking user: " + ex.getMessage());
+			            ex.printStackTrace();
+			        }
+			    }
+			});
+
+
 	        
 	        frame.setJMenuBar(menuBar);
 	        
