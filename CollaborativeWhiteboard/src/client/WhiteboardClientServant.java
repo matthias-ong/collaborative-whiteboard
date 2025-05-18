@@ -17,6 +17,7 @@ import remote.DrawEvent;
 import remote.IWhiteboardClient;
 import remote.IWhiteboardServer;
 import whiteboardapp.Whiteboard;
+import whiteboardapp.Whiteboard.Drawable;
 
 public class WhiteboardClientServant extends UnicastRemoteObject implements IWhiteboardClient {
 	private IWhiteboardServer server;
@@ -45,6 +46,15 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
 		if (this.whiteboard != null) {
 //			System.out.println("Received Draw Event from Server");
 			this.whiteboard.addDrawableFromNetwork(event);
+		}
+	}
+	
+	@Override
+	public void updateWhiteboard(List<Drawable> drawHistory) throws RemoteException {
+		if (this.whiteboard != null) {
+			EventQueue.invokeLater(() -> {
+				this.whiteboard.setDrawHistory(drawHistory);
+	        });
 		}
 	}
 

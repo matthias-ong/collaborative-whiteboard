@@ -3,6 +3,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import whiteboardapp.Whiteboard.Drawable;
+
 /**
  * RMI Remote interface - must be shared between client and server.
  * This is the interface that clients call on the server.
@@ -22,5 +24,6 @@ public interface IWhiteboardServer extends Remote {
 	void broadcastChatMessage(String username, String msg) throws RemoteException;
 	void broadcastMessage(String msg) throws RemoteException;
 	void broadcastUserList() throws RemoteException;
+	void broadcastWhiteboardHistory(List<Drawable> drawHistory) throws RemoteException;
 	
 }

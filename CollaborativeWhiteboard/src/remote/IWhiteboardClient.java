@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.swing.JList;
 
+import whiteboardapp.Whiteboard.Drawable;
+
 /**
  * RMI Remote interface - must be shared between client and server.
  * This is the interface that the server call on the clients.
@@ -20,4 +22,5 @@ public interface IWhiteboardClient extends Remote {
     void notifyKicked() throws RemoteException;
 	void notifyManagerLeft() throws RemoteException;
 	void updateUserList(List<String> userList) throws RemoteException;
+	void updateWhiteboard(List<Drawable> drawHistory) throws RemoteException;
 }

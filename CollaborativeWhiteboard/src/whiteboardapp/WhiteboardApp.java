@@ -13,7 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -21,11 +24,13 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import constants.Constants;
 import constants.Constants.ShapeType;
@@ -37,6 +42,7 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -74,6 +80,9 @@ public class WhiteboardApp {
 	private DefaultListModel<String> userListModel = new DefaultListModel<>();
 	private JTextArea chatArea;
 	private JTextField chatInput;
+	
+	private Boolean isManager;
+	private File currentFile;
 
 
 	/**
@@ -81,10 +90,11 @@ public class WhiteboardApp {
      *
      * @param args Command line arguments, it should be in the order server-address, server-port.
      */
-	public WhiteboardApp(IWhiteboardServer rmiServer, String username) {
+	public WhiteboardApp(IWhiteboardServer rmiServer, String username, Boolean isManager) {
 		this.server = rmiServer;
 		this.username = username;
 		this.whiteboard = new Whiteboard(rmiServer);
+		this.isManager = isManager;
 		initialise();
 		// run the connection in the background
 	}
@@ -103,35 +113,72 @@ public class WhiteboardApp {
 		frame.getContentPane().setLayout(null);
 		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(WhiteboardApp.class.getResource("/WhiteboardApp/dictionary.png")));
 		
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 600, 25);
-		
-		JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-		
-		JMenuItem newItem = new JMenuItem("New");
-        JMenuItem openItem = new JMenuItem("Open");
-        JMenuItem saveItem = new JMenuItem("Save");
-        JMenuItem saveAsItem = new JMenuItem("Save As");
-        JMenuItem closeItem = new JMenuItem("Close");
+		if (this.isManager) {
+			JMenuBar menuBar = new JMenuBar();
+			menuBar.setBounds(0, 0, 600, 25);
+			
+			JMenu fileMenu = new JMenu("File");
+			menuBar.add(fileMenu);
+			
+			JMenuItem newItem = new JMenuItem("New");
+			newItem.addActionListener(_ -> {
+				try {
+					this.whiteboard.setDrawHistory(new ArrayList<>());
+					server.broadcastWhiteboardHistory(this.whiteboard.getDrawHistory());
+					this.currentFile = null;
+				} catch (RemoteException e) {
+					System.out.println("Error broadcasting whiteboard!");
+				}
+	        });
+	        JMenuItem openItem = new JMenuItem("Open");
+	        openItem.addActionListener(_ -> {
+	        	JFileChooser fileChooser = new JFileChooser();
+	        	fileChooser.setFileFilter(new FileNameExtensionFilter("Whiteboard Files (*.wbd)", "wbd"));
+	        	if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+	        		File file = fileChooser.getSelectedFile();
+	        		try {
+	        			whiteboard.loadFromFile(file);
+	        			server.broadcastWhiteboardHistory(this.whiteboard.getDrawHistory());
+	        		} catch (Exception ex) {
+	        			JOptionPane.showMessageDialog(frame, "Error loading file: " + ex.getMessage());
+	        		}
+	        	}
+	        });
+	        JMenuItem saveItem = new JMenuItem("Save");
+	        saveItem.addActionListener(_ -> {
+	        	if (currentFile != null) {
+	        		try {
+	        			whiteboard.saveToFile(currentFile);
+	        		} catch (IOException ex) {
+	        			JOptionPane.showMessageDialog(frame, "Error saving file: " + ex.getMessage());
+	        		}
+	            } else {
+	                saveAs(); // fallback to Save As
+	            }
+	        	
+	        });
+	        JMenuItem saveAsItem = new JMenuItem("Save As");
+	        saveAsItem.addActionListener(_ -> {
+	        	saveAs();
+	        });
+	        JMenuItem closeItem = new JMenuItem("Close");
 
-        fileMenu.add(newItem);
-        fileMenu.add(openItem);
-        fileMenu.add(saveItem);
-        fileMenu.add(saveAsItem);
-        fileMenu.addSeparator();
-        fileMenu.add(closeItem);
-        menuBar.add(fileMenu);
-        
-        JMenu manageMenu = new JMenu("Manage");
-		menuBar.add(manageMenu);
-        
-        
-        frame.setJMenuBar(menuBar);
-        
-        // Example action for "Close"
-        closeItem.addActionListener(_ -> frame.dispose());
-        
+	        fileMenu.add(newItem);
+	        fileMenu.add(openItem);
+	        fileMenu.add(saveItem);
+	        fileMenu.add(saveAsItem);
+	        fileMenu.addSeparator();
+	        fileMenu.add(closeItem);
+	        menuBar.add(fileMenu);
+	        
+	        JMenu manageMenu = new JMenu("Manage");
+			menuBar.add(manageMenu);
+	        
+	        
+	        frame.setJMenuBar(menuBar);
+	        
+	        closeItem.addActionListener(_ -> frame.dispose());
+		}		
         
         whiteboard.setBounds(0, 75, 750, 500);
         frame.getContentPane().add(whiteboard);
@@ -329,6 +376,20 @@ public class WhiteboardApp {
 			}
         });
         rightPanel.add(sendBtn);
+	}
+	
+	private void saveAs() {
+		JFileChooser fileChooser = new JFileChooser();
+    	fileChooser.setFileFilter(new FileNameExtensionFilter("Whiteboard Files (*.wbd)", "wbd"));
+    	if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+    		File file = fileChooser.getSelectedFile();
+    		try {
+    			whiteboard.saveToFile(file);
+    			this.currentFile = file;
+    		} catch (IOException ex) {
+    			JOptionPane.showMessageDialog(frame, "Error saving file: " + ex.getMessage());
+    		}
+    	}
 	}
 	
 	public Whiteboard getWhiteBoard() {

@@ -60,7 +60,7 @@ public class JoinWhiteBoard {
     		EventQueue.invokeLater(new Runnable() {
     			public void run() {
     				try {
-    					WhiteboardApp app = new WhiteboardApp(server, joinWB.username);
+    					WhiteboardApp app = new WhiteboardApp(server, joinWB.username, false);
     					System.out.println("Join Whiteboard!");
     					client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
     					server.broadcastUserList();
@@ -70,7 +70,7 @@ public class JoinWhiteBoard {
     	                    @Override
     	                    public void windowClosed(WindowEvent e) {
     	                        try {
-    	                            server.removeClient(client, joinWB.username); // <- implement this on server
+    	                            server.removeClient(client, joinWB.username);
     	                            UnicastRemoteObject.unexportObject(client, true);
     	                            System.out.println("Client shutdown cleanly.");
     	                        } catch (Exception ex) {

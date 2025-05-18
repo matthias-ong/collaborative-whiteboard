@@ -10,6 +10,13 @@ import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +43,7 @@ public class Whiteboard extends JPanel {
 
 	IWhiteboardServer rmiServer; // refer to the whiteboard server to synchronise information with
 
-	abstract class Drawable {
+	public abstract class Drawable implements Serializable {
 		List<Point> points;
 		Color color;
 		int size;
@@ -304,6 +311,33 @@ public class Whiteboard extends JPanel {
 		}
 		return null;
 	}
+	
+	public void saveToFile(File file) throws IOException {
+		if (!file.getName().toLowerCase().endsWith(".wbd")) {
+	        file = new File(file.getAbsolutePath() + ".wbd");
+	    }
+		
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+			out.writeObject(drawHistory);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public void loadFromFile(File file) throws Exception {
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+			this.drawHistory = (List<Drawable>)in.readObject();
+			repaint();
+		}
+	}
+	
+//	public void clearWhiteboard() {
+//		drawHistory = new ArrayList<>();
+//		currentStroke = null;
+//		startPoint = null;
+//		endPoint = null;
+//		repaint();
+//	}
+
 
 	public Color getColour() {
 		return this.currColour;
@@ -315,6 +349,10 @@ public class Whiteboard extends JPanel {
 
 	public int getFontSize() {
 		return this.fontSize;
+	}
+	
+	public List<Drawable> getDrawHistory() {
+		return this.drawHistory;
 	}
 
 	public void setShapeSelection(ShapeType newShape) {
@@ -332,4 +370,14 @@ public class Whiteboard extends JPanel {
 	public void setColour(Color colour) {
 		this.currColour = colour;
 	}
+	
+	public void setDrawHistory(List<Drawable> newHistory) {
+		this.drawHistory = newHistory;
+		currentStroke = null;
+		startPoint = null;
+		endPoint = null;
+		repaint();
+	}
+	
+	
 }

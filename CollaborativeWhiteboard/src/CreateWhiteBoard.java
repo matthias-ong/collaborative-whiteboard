@@ -54,7 +54,7 @@ public class CreateWhiteBoard {
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-						WhiteboardApp app = new WhiteboardApp(server, createWB.username);
+						WhiteboardApp app = new WhiteboardApp(server, createWB.username, true);
 						client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
 						server.broadcastUserList();
 						server.broadcastMessage(createWB.username + " joined.");
