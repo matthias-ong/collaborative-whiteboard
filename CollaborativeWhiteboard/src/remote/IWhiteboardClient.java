@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.JList;
 
+import whiteboardapp.Whiteboard;
 import whiteboardapp.Whiteboard.Drawable;
 
 /**
@@ -23,4 +24,5 @@ public interface IWhiteboardClient extends Remote {
 	void notifyManagerLeft() throws RemoteException;
 	void updateUserList(List<String> userList) throws RemoteException;
 	void updateWhiteboard(List<Drawable> drawHistory) throws RemoteException;
+	Whiteboard getWhiteboard() throws RemoteException;
 }

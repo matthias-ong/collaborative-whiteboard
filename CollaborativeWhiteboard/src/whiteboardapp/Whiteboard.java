@@ -379,5 +379,4 @@ public class Whiteboard extends JPanel {
 		repaint();
 	}
 	
-	
 }

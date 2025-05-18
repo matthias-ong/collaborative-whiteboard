@@ -95,8 +95,7 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
             }
             System.exit(0);
 		});
-        
-        
+
     }
 	
 	@Override
@@ -111,5 +110,9 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
 
 	public String getUsername() {
 		return username;
+	}
+	
+	public Whiteboard getWhiteboard() throws RemoteException {
+		return this.whiteboard;
 	}
 }

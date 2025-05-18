@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
+import client.WhiteboardClientServant;
 import remote.DrawEvent;
 import remote.IWhiteboardClient;
 import remote.IWhiteboardServer;
@@ -17,6 +18,7 @@ import whiteboardapp.Whiteboard.Drawable;
 public class WhiteboardServerServant extends UnicastRemoteObject implements IWhiteboardServer {
 	private Map<String, IWhiteboardClient> clients = new HashMap<>();
 	private String manager;
+	private List<Drawable> drawHistory;
 
 	public WhiteboardServerServant(String manager) throws RemoteException {
 		this.manager = manager;
@@ -30,7 +32,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	}
 	
 	@Override
-	public synchronized void broadcastWhiteboardHistory(List<Drawable> drawHistory) throws RemoteException {
+	public synchronized void broadcastWhiteboardHistory() throws RemoteException {
 		for (IWhiteboardClient client : clients.values()) {
 			client.updateWhiteboard(drawHistory);
 		}
@@ -113,6 +115,16 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 
 	public String getManager() {
 		return this.manager;
+	}
+
+	public List<Drawable> getDrawHistory() throws RemoteException {
+		// get manager's whiteboard history, everybody syncs to manager
+		IWhiteboardClient client = clients.get(this.manager);
+		return client.getWhiteboard().getDrawHistory();
+	}
+
+	public void setDrawHistory(List<Drawable> drawHistory) throws RemoteException {
+		this.drawHistory = drawHistory;
 	}
 
 }

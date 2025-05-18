@@ -124,7 +124,7 @@ public class WhiteboardApp {
 			newItem.addActionListener(_ -> {
 				try {
 					this.whiteboard.setDrawHistory(new ArrayList<>());
-					server.broadcastWhiteboardHistory(this.whiteboard.getDrawHistory());
+					server.broadcastWhiteboardHistory();
 					this.currentFile = null;
 				} catch (RemoteException e) {
 					System.out.println("Error broadcasting whiteboard!");
@@ -138,7 +138,8 @@ public class WhiteboardApp {
 	        		File file = fileChooser.getSelectedFile();
 	        		try {
 	        			whiteboard.loadFromFile(file);
-	        			server.broadcastWhiteboardHistory(this.whiteboard.getDrawHistory());
+	        			server.setDrawHistory(this.whiteboard.getDrawHistory());
+	        			server.broadcastWhiteboardHistory();
 	        		} catch (Exception ex) {
 	        			JOptionPane.showMessageDialog(frame, "Error loading file: " + ex.getMessage());
 	        		}

@@ -8,7 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -16,9 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
 import javax.swing.JFrame;
 
 import client.WhiteboardClientServant;
-import remote.IWhiteboardClient;
 import remote.IWhiteboardServer;
-import server.WhiteboardServerServant;
 import whiteboardapp.WhiteboardApp;
 
 /**
@@ -51,7 +48,13 @@ public class JoinWhiteBoard {
 			boolean approved = server.requestJoin(client, joinWB.username);
             if (!approved) {
                 System.out.println("Join request denied.");
-                return;
+                try {
+                    UnicastRemoteObject.unexportObject(client, true);
+                    System.out.println("Client shutdown cleanly.");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                System.exit(0);
             }
             
             System.out.println("Join request approved.");
@@ -63,6 +66,7 @@ public class JoinWhiteBoard {
     					WhiteboardApp app = new WhiteboardApp(server, joinWB.username, false);
     					System.out.println("Join Whiteboard!");
     					client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
+    					app.getWhiteBoard().setDrawHistory(server.getDrawHistory());
     					server.broadcastUserList();
     					server.broadcastMessage(joinWB.username + " joined.");
     					JFrame frame = app.getFrame();

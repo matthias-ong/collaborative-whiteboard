@@ -24,6 +24,7 @@ public interface IWhiteboardServer extends Remote {
 	void broadcastChatMessage(String username, String msg) throws RemoteException;
 	void broadcastMessage(String msg) throws RemoteException;
 	void broadcastUserList() throws RemoteException;
-	void broadcastWhiteboardHistory(List<Drawable> drawHistory) throws RemoteException;
-	
+	void broadcastWhiteboardHistory() throws RemoteException;
+	void setDrawHistory(List<Drawable> drawHistory) throws RemoteException;
+	List<Drawable> getDrawHistory() throws RemoteException;
 }

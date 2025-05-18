@@ -7,10 +7,6 @@
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -18,7 +14,6 @@ import java.rmi.server.UnicastRemoteObject;
 import javax.swing.JFrame;
 
 import client.WhiteboardClientServant;
-import remote.IWhiteboardServer;
 import server.WhiteboardServerServant;
 import whiteboardapp.WhiteboardApp;
 /**
@@ -56,6 +51,7 @@ public class CreateWhiteBoard {
 					try {
 						WhiteboardApp app = new WhiteboardApp(server, createWB.username, true);
 						client.initialise(app.getWhiteBoard(), app.getChatArea(), app.getUserList());
+						app.getWhiteBoard().setDrawHistory(server.getDrawHistory());
 						server.broadcastUserList();
 						server.broadcastMessage(createWB.username + " joined.");
 						JFrame frame = app.getFrame();
