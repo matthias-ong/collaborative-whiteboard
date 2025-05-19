@@ -129,6 +129,7 @@ public class WhiteboardApp {
 			newItem.addActionListener(_ -> {
 				try {
 					this.whiteboard.setDrawHistory(new ArrayList<>());
+					server.setDrawHistory(this.whiteboard.getDrawHistory());
 					server.broadcastWhiteboardHistory();
 					this.currentFile = null;
 				} catch (RemoteException e) {

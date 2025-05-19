@@ -45,7 +45,7 @@ public class Whiteboard extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	/** Draw history of the whiteboard. */
-	private List<Drawable> drawHistory = new ArrayList<>();
+	private List<Drawable> drawHistory;
 	
 	/** Current stroke */
 	private List<Point> currentStroke = null;
@@ -95,6 +95,10 @@ public class Whiteboard extends JPanel {
 
 		/** Draws the shape on the provided. */
 		abstract void draw(Graphics2D g2);
+		
+		/** Makes a deep copy of Drawable to prevent side effects across clients. */
+		public abstract Drawable copy();
+
 	}
 
 	/**
@@ -132,6 +136,18 @@ public class Whiteboard extends JPanel {
 				Point p2 = points.get(i);
 				g2.drawLine(p1.x, p1.y, p2.x, p2.y);
 			}
+		}
+		
+		/**
+		 * Implements the copying.
+	     */
+		@Override
+		public Drawable copy() {
+		    List<Point> copiedPoints = new ArrayList<>();
+		    for (Point p : this.points) {
+		        copiedPoints.add(new Point(p));
+		    }
+		    return new NormalStroke(copiedPoints, new Color(color.getRGB()), size);
 		}
 	}
 
@@ -177,6 +193,15 @@ public class Whiteboard extends JPanel {
 			Point p1 = this.points.get(0);
 			g2.drawString(text, p1.x, p1.y);
 		}
+		
+		/**
+		 * Implements the copying.
+	     */
+		@Override
+		public Drawable copy() {
+		    Point p = this.points.get(0);
+		    return new TextField(new String(text), p.x, p.y, new Color(color.getRGB()), size);
+		}
 	}
 
 	/**
@@ -213,6 +238,18 @@ public class Whiteboard extends JPanel {
 				Point p2 = points.get(i);
 				g2.drawLine(p1.x, p1.y, p2.x, p2.y);
 			}
+		}
+		
+		/**
+		 * Implements the copying.
+	     */
+		@Override
+		public Drawable copy() {
+		    List<Point> copiedPoints = new ArrayList<>();
+		    for (Point p : this.points) {
+		        copiedPoints.add(new Point(p));
+		    }
+		    return new EraserStroke(copiedPoints, size);
 		}
 	}
 
@@ -281,6 +318,16 @@ public class Whiteboard extends JPanel {
 				break;
 			}
 		}
+		
+		/**
+		 * Implements the copying.
+	     */
+		@Override
+		public Drawable copy() {
+		    Point p1 = this.points.get(0);
+		    Point p2 = this.points.get(1);
+		    return new ShapeInfo(type, new Point(p1), new Point(p2), new Color(color.getRGB()), size);
+		}
 	}
 
 	/**
@@ -289,6 +336,7 @@ public class Whiteboard extends JPanel {
      */
 	public Whiteboard(IWhiteboardServer rmiServer) {
 		this.rmiServer = rmiServer;
+		this.drawHistory = new ArrayList<>();
 		setBackground(Color.WHITE);
 
 		addMouseListener(new MouseAdapter() {

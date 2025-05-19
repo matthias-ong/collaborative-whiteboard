@@ -121,7 +121,7 @@ public class JoinWhiteBoard {
 			return false;
 		}
 		catch (UnknownHostException e) {
-			System.out.println("Invalid IP address" + args[0]);
+			System.out.println("Invalid IP address: " + args[0]);
 			return false;
 		}
 		this.username = args[2];

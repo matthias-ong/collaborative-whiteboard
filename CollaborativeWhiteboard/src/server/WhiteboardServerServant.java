@@ -61,6 +61,9 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
      */
 	@Override
 	public synchronized void broadcastWhiteboardHistory() throws RemoteException {
+		if (drawHistory == null) {
+	        drawHistory = new ArrayList<>(); // Prevent null reference
+	    }
 		for (IWhiteboardClient client : clients.values()) {
 			client.updateWhiteboard(drawHistory);
 		}

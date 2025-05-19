@@ -8,6 +8,7 @@ package client;
 import java.awt.EventQueue;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -90,6 +91,11 @@ public class WhiteboardClientServant extends UnicastRemoteObject implements IWhi
 	public void updateWhiteboard(List<Drawable> drawHistory) throws RemoteException {
 		if (this.whiteboard != null) {
 			EventQueue.invokeLater(() -> {
+				// make a copy of the draw history
+				List<Drawable> copyDrawHistory = new ArrayList<>();
+				for (Drawable d : drawHistory) {
+				    copyDrawHistory.add(d.copy());
+				}
 				this.whiteboard.setDrawHistory(drawHistory);
 	        });
 		}
