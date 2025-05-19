@@ -96,7 +96,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
      * @param username
      */
 	@Override
-	public synchronized boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException {
+	public synchronized Boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException {
 		if (!clients.containsKey(username)) {
 			int response = JOptionPane.showConfirmDialog(null, username + " wants to join your whiteboard. Approve?",
 					"Join Request", JOptionPane.YES_NO_OPTION);
@@ -188,6 +188,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	/**
 	 * Getter for user list of the server.
      */
+	@Override
 	public List<Drawable> getDrawHistory() throws RemoteException {
 		// get manager's whiteboard history, everybody syncs to manager
 		IWhiteboardClient manager = clients.get(this.manager);
@@ -198,6 +199,7 @@ public class WhiteboardServerServant extends UnicastRemoteObject implements IWhi
 	 * Setter for draw history of the server.
 	 * @param drawHistory
      */
+	@Override
 	public void setDrawHistory(List<Drawable> drawHistory) throws RemoteException {
 		this.drawHistory = drawHistory;
 	}

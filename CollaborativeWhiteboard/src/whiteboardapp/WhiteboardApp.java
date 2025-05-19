@@ -55,7 +55,7 @@ public class WhiteboardApp {
 	private Whiteboard whiteboard;
 
 	/** List of colours allowed to be selected. */
-	Color[] colors = {
+	private Color[] colors = {
 		    Color.BLACK, Color.DARK_GRAY, Color.GRAY, Color.LIGHT_GRAY,
 		    Color.WHITE, Color.RED, Color.PINK, Color.ORANGE,
 		    Color.YELLOW, Color.GREEN, Color.MAGENTA, Color.CYAN,
@@ -353,7 +353,7 @@ public class WhiteboardApp {
         
         JComboBox<String> fontSizesDropdown = new JComboBox<>(fontSizes);
         fontSizesDropdown.setBounds(645, 30, 60, 24);
-        fontSizesDropdown.setSelectedItem(whiteboard.getFontSize()); // set default selection
+        fontSizesDropdown.setSelectedItem(String.valueOf(whiteboard.getFontSize())); // set default selection
         frame.getContentPane().add(fontSizesDropdown);
         fontSizesDropdown.addActionListener(_ -> {
             String selected = (String) fontSizesDropdown.getSelectedItem();

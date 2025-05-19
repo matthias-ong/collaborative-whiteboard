@@ -46,7 +46,7 @@ public interface IWhiteboardServer extends Remote {
      * @param client
      * @param username
      */
-    boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException;
+    Boolean requestJoin(IWhiteboardClient client, String username) throws RemoteException;
     
     /**
 	 * Client is kicked from server.
